@@ -37,8 +37,8 @@ if __name__ == "__main__":
     with input_path.open() as file:
         tree = l.parse(file.read())
 
-        print(tree)
-        print(tree.pretty())
+        #print(tree)
+        #print(tree.pretty())
         t = TreeTransformer()
         ast = t.transform(tree)
         ast.accept(NameResolver())

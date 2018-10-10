@@ -5,7 +5,7 @@ class Scope:
     def __init__(self):
         self.variables = {}
         self.functions = {}
-        self.types = {"int": None, "boolean": None}
+        self.types = {}
 
     def declare_variable(self, name, type):
         raise NotImplementedError
@@ -29,10 +29,10 @@ class Scope:
         return self.variables[name]
 
     def get_function(self, name):
-        raise self.functions[name]
+        return self.functions[name]
 
     def get_type(self, name):
-        raise self.types[name]
+        return self.types[name]
 
     class Variable:
         def __init__(self, namespace, name, type_):
@@ -54,11 +54,23 @@ class Scope:
         def get_identifier(self):
             raise NotImplementedError
 
+    class Type:
+        def __init__(self, namespace, name):
+            self.namespace = namespace
+            self.name = name
+
+        def __eq__(self, other):
+            if self.__class__ != other.__class__:
+                return False
+            return self.name == other.name and self.namespace == other.namespace
+
 
 class GlobalScope(Scope):
     def __init__(self, namespace):
         super().__init__()
         self.namespace = namespace
+        self.types["int"] = self.intType
+        self.types["boolean"] = self.booleanType
 
     def declare_variable(self, name, type_):
         self.variables[name] = self.GlobalVariable(self.namespace, name, type_)
@@ -76,6 +88,12 @@ class GlobalScope(Scope):
     class GlobalFunction(Scope.Function):
         def get_identifier(self):
             return f"{self.namespace.reference.name}:{self.name}"
+
+    class GlobalType(Scope.Type):
+        pass
+
+    intType = GlobalType(None, "int")
+    booleanType = GlobalType(None, "boolean")
 
 
 class BlockScope(Scope):

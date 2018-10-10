@@ -37,4 +37,4 @@ class BadOperandException(CompilerException):
             types_string = ", ".join([f"'{type.name}'" for type in types])
             super().__init__(f"Operand '{operand}' cannot be applied to types {types_string}")
         else:
-            super().__init__(f"Operand '{operand}' cannot be applied to type '{types[0]}")
+            super().__init__(f"Operand '{operand}' cannot be applied to type '{types[0].name}'")

@@ -1,5 +1,7 @@
 from lark import Tree
 
+from symboltable import GlobalScope
+
 
 class Construct(Tree):
     construct_name = None
@@ -47,11 +49,12 @@ class FunctionDeclaration(Construct):
 class VariableDeclaration(Construct):
     construct_name = "variable_declaration"
 
-    def __init__(self, type, reference, expression):
+    def __init__(self, type_ref, reference, expression):
         super().__init__([x for x in [type, reference, expression] if x is not None])
-        self.type = type
+        self.type_ref = type_ref
         self.reference = reference
         self.expression = expression
+        self.type = None
 
     def __repr__(self):
         return f"<{self.__class__.__name__} '{self.reference}'>"
@@ -194,9 +197,9 @@ class Constant(Expression):
         super().__init__([])
         self.value = value
         if value.type == "INT":
-            self.type = intType
+            self.type = GlobalScope.intType
         elif value.type == "BOOLEAN":
-            self.type = booleanType
+            self.type = GlobalScope.booleanType
         else:
             assert False
 
@@ -219,10 +222,9 @@ class Reference(Construct):
 class TypeReference(Reference):
     construct_name = "type_ref"
 
-    def __eq__(self, other):
-        if self.__class__ != other.__class__:
-            return False
-        return self.name == other.name
+    def __init__(self, name):
+       super().__init__(name)
+       self.type = None
 
 
 class FunctionReference(Reference):
@@ -239,7 +241,3 @@ class VariableReference(Reference, Expression):
 
 class NamespaceReference(Reference):
     construct_name = "namespace_ref"
-
-
-intType = TypeReference("int")
-booleanType = TypeReference("boolean")
