@@ -2,7 +2,7 @@
 %ignore COMMENT
 %ignore WS
 
-IDENTIFIER: /\b(?!(function|class|namespace|run|on|class)\b)[a-z][a-z0-9_]*/
+IDENTIFIER: /\b(?!(function|class|namespace|run|on|class|true|false)\b)[a-z][a-z0-9_]*/
 
 BOOLEAN: ("true" | "false")
 

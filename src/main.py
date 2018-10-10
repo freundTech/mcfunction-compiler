@@ -41,5 +41,4 @@ if __name__ == "__main__":
         print(tree.pretty())
         t = TreeTransformer()
         ast = t.transform(tree)
-        print(ast)
         ast.accept(NameResolver())

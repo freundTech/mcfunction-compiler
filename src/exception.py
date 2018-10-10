@@ -1,22 +1,40 @@
-class DuplicateClassException(Exception):
+class CompilerException(Exception):
     pass
 
 
-class DuplicateFunctionException(Exception):
+class DuplicateClassException(CompilerException):
     pass
 
 
-class DuplicateVariableException(Exception):
+class DuplicateFunctionException(CompilerException):
     pass
 
 
-class UndeclaredVariableException(Exception):
+class DuplicateVariableException(CompilerException):
+    pass
+
+
+class UndeclaredVariableException(CompilerException):
     def __init__(self, name):
         self.name = name
 
-class UndeclaredFunctionException(Exception):
+
+class UndeclaredFunctionException(CompilerException):
     pass
 
 
-class UndeclaredTypeException(Exception):
+class UndeclaredTypeException(CompilerException):
     pass
+
+
+class TypeMissmatchException(CompilerException):
+    pass
+
+
+class BadOperandException(CompilerException):
+    def __init__(self, operand, *types):
+        if len(types) > 1:
+            types_string = ", ".join([f"'{type.name}'" for type in types])
+            super().__init__(f"Operand '{operand}' cannot be applied to types {types_string}")
+        else:
+            super().__init__(f"Operand '{operand}' cannot be applied to type '{types[0]}")
