@@ -5,7 +5,8 @@ from argparse import ArgumentParser
 from pkg_resources import resource_string
 from pathlib import Path
 
-from transformer import TreeTransformer, token_to_boolean, token_to_int, token_to_string
+from codegeneration import CodeGenerator
+from transformer import TreeTransformer
 from visitor import NameResolver
 
 if __name__ == "__main__":
@@ -28,17 +29,12 @@ if __name__ == "__main__":
         exit(1)
 
     grammar = resource_string(__name__, "grammar.lark").decode()
-    l = Lark(grammar, parser="earley", lexer_callbacks={
-        'INT': token_to_int,
-        'BOOLEAN': token_to_boolean,
-        'STRING': token_to_string,
-    })
+    l = Lark(grammar, parser="earley")
 
     with input_path.open() as file:
         tree = l.parse(file.read())
 
-        #print(tree)
-        #print(tree.pretty())
         t = TreeTransformer()
         ast = t.transform(tree)
         ast.accept(NameResolver())
+        ast.accept(CodeGenerator())
