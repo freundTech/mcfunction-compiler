@@ -1,243 +1,291 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
+
 from lark import Tree
 
-from symboltable import GlobalScope
+from symboltable import IntType, BooleanType
 
+if TYPE_CHECKING:
+    from typing import List, Any
+    from lark.lexer import Token
+    from instructions import Instruction
+    from visitor import Visitor
+    from symboltable import Scope
 
 class Construct(Tree):
-    construct_name = None
+    construct_name: str = None
 
-    def __init__(self, children):
+    def __init__(self, children: List[Construct]):
         super().__init__(self.construct_name, children)
+        self.code: List[Instruction] = None
 
-    def accept(self, visitor):
+    def accept(self, visitor: Visitor):
         visitor.visit(self.construct_name, self)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__}>"
 
 
 class Start(Construct):
-    construct_name = "start"
+    construct_name: str = "start"
 
 
 class Namespace(Construct):
-    construct_name = "namespace"
+    construct_name: str = "namespace"
 
-    def __init__(self, reference):
+    def __init__(self, reference: NamespaceReference):
         super().__init__([reference])
-        self.reference = reference
-        self.namespace_path = None
+        self.reference: NamespaceReference = reference
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} '{self.reference}'>"
+
+
+class Arguments(Construct):
+    construct_name: str = "arguments"
+
+    def __init__(self, arguments: List[Argument]):
+        super().__init__(arguments)
+        self.arguments = arguments
+
+
+class Argument(Construct):
+    construct_name: str = "argument"
+
+    def __init__(self, type_: TypeReference, reference: VariableReference):
+        super().__init__([type_, reference])
+        self.type: TypeReference = type
+        self.reference: VariableReference = reference
+
+
+class Events(Construct):
+    construct_name: str = "events"
+
+    def __init__(self, events):
+        super().__init__(events)
+        self.events = events
+
+
+class Event(Construct):
+    construct_name: str = "event"
+
+    def __init__(self, namespace: NamespaceReference, function_: FunctionReference):
+        super().__init__([namespace, function_])
+        self.namespace: NamespaceReference = namespace
+        self.function: FunctionReference = function_
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__} '{self.namespace}:{self.function}'"
 
 
 class FunctionDeclaration(Construct):
-    construct_name = "function_declaration"
+    construct_name: str = "function_declaration"
 
-    def __init__(self, reference, arguments, event, expression):
-        super().__init__([x for x in [reference, arguments, expression] if x is not None])
-        self.reference = reference
-        self.arguments = arguments
-        self.event = event
-        self.expression = expression
+    def __init__(self, reference: FunctionReference, arguments: Arguments, event: Event, block: Block):
+        super().__init__([x for x in [reference, arguments, block] if x is not None])
+        self.reference: FunctionReference = reference
+        self.arguments: Arguments = arguments
+        self.event: Event = event
+        self.block: Block = block
 
-    def __repr__(self):
-        return f"<{self.__class__.__name__} '{self.reference}'>"
-
-
-class VariableDeclaration(Construct):
-    construct_name = "variable_declaration"
-
-    def __init__(self, type_ref, reference, expression):
-        super().__init__([x for x in [type, reference, expression] if x is not None])
-        self.type_ref = type_ref
-        self.reference = reference
-        self.expression = expression
-        self.type = None
-
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} '{self.reference}'>"
 
 
 class Statement(Construct):
-    construct_name = "statement"
-    pass
+    construct_name: str = "statement"
+
+
+class VariableDeclaration(Statement):
+    construct_name: str = "variable_declaration"
+
+    def __init__(self, type_ref: TypeReference, reference: VariableReference, expression: Optional[Expression]=None):
+        super().__init__([x for x in [type_ref, reference, expression] if x is not None])
+        self.type_ref: TypeReference = type_ref
+        self.reference: VariableReference = reference
+        self.expression: Expression = expression
+        self.type: Scope.Type = None
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__} '{self.reference}'>"
 
 
 class ExpressionStatement(Statement):
-    construct_name = "expression_statement"
+    construct_name: str = "expression_statement"
 
-    def __init__(self, expression):
+    def __init__(self, expression: Expression):
         super().__init__([expression])
-        self.expression = expression
+        self.expression: Expression = expression
 
 
 class ReturnStatement(ExpressionStatement):
-    construct_name = "return_statement"
+    construct_name: str = "return_statement"
 
 
 class Block(Statement):
-    construct_name = "block"
+    construct_name: str = "block"
 
-    def __init__(self, statements):
+    def __init__(self, statements: List[Statement]):
         super().__init__(statements)
-        self.statements = statements
+        self.statements: List[Statement] = statements
 
 
 class Expression(Construct):
-    construct_name = "expression"
+    construct_name: str = "expression"
 
-    def __init__(self, children):
+    def __init__(self, children: List[Expression]):
         super().__init__(children)
-        self.type = None
+        self.type: Scope.Type = None
 
 
 class Assignment(Expression):
-    construct_name = "assignment"
+    construct_name: str = "assignment"
 
-    def __init__(self, ref, expression):
+    def __init__(self, ref: VariableReference, expression: Expression):
         super().__init__([ref, expression])
-        self.ref = ref
-        self.expression = expression
+        self.ref: VariableReference = ref
+        self.expression: Expression = expression
 
 
 class TwoSidedOperation(Expression):
-    construct_name = "two_sided_operation"
+    construct_name: str = "two_sided_operation"
 
-    def __init__(self, left_expression, right_expression):
+    def __init__(self, left_expression: Expression, right_expression: Expression):
         super().__init__([left_expression, right_expression])
-        self.left_expression = left_expression
-        self.right_expression = right_expression
+        self.left_expression: Expression = left_expression
+        self.right_expression: Expression = right_expression
 
 
 class UnaryOperation(Expression):
-    construct_name = "unary_operation"
+    construct_name: str = "unary_operation"
 
-    def __init__(self, expression):
+    def __init__(self, expression: Expression):
         super().__init__([expression])
-        self.expression = expression
+        self.expression: Expression = expression
 
 
 class OrOperation(TwoSidedOperation):
-    construct_name = "or_operation"
+    construct_name: str = "or_operation"
 
 
 class AndOperation(TwoSidedOperation):
-    construct_name = "and_operation"
+    construct_name: str = "and_operation"
 
 
 class EqualityOperation(TwoSidedOperation):
-    construct_name = "equality_operation"
+    construct_name: str = "equality_operation"
 
 
 class UnequalityOperation(TwoSidedOperation):
-    construct_name = "unequality_operation"
+    construct_name: str = "unequality_operation"
 
 
 class LessThenOperation(TwoSidedOperation):
-    construct_name = "less_then_operation"
+    construct_name: str = "less_then_operation"
 
 
 class LessThenEqualsOperation(TwoSidedOperation):
-    construct_name = "less_then_equals_operation"
+    construct_name: str = "less_then_equals_operation"
 
 
 class GreaterThenOperation(TwoSidedOperation):
-    construct_name = "greater_then_operation"
+    construct_name: str = "greater_then_operation"
 
 
 class GreaterThenEqualsOperation(TwoSidedOperation):
-    construct_name = "greater_then_equals_operation"
+    construct_name: str = "greater_then_equals_operation"
 
 
 class AdditionOperation(TwoSidedOperation):
-    construct_name = "addition_operation"
+    construct_name: str = "addition_operation"
 
 
 class SubtractionOperation(TwoSidedOperation):
-    construct_name = "subtraction_operation"
+    construct_name: str = "subtraction_operation"
 
 
 class MultiplicationOperation(TwoSidedOperation):
-    construct_name = "multiplication_operation"
+    construct_name: str = "multiplication_operation"
 
 
 class DivisionOperation(TwoSidedOperation):
-    construct_name = "division_operation"
+    construct_name: str = "division_operation"
 
 
 class UnaryPlusOperation(UnaryOperation):
-    construct_name = "unary_plus_operation"
+    construct_name: str = "unary_plus_operation"
 
 
 class UnaryMinusOperation(UnaryOperation):
-    construct_name = "unary_minus_operation"
+    construct_name: str = "unary_minus_operation"
 
 
 class UnaryNotOperation(UnaryOperation):
-    construct_name = "unary_not_operation"
+    construct_name: str = "unary_not_operation"
 
 
 class RunExpression(Expression):
-    construct_name = "run_expression"
+    construct_name: str = "run_expression"
 
-    def __init__(self, command):
+    # TODO: Use String type instead of token
+    def __init__(self, command: Token):
         super().__init__([])
-        self.command = command
+        self.command: Token = command[1:-1].encode("utf-8").decode("unicode_escape")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} '{self.command}'>"
 
 
 class Constant(Expression):
-    construct_name = "constant"
+    construct_name: str = "constant"
 
-    def __init__(self, value):
+    def __init__(self, value: Token):
         super().__init__([])
-        self.value = value
+        self.value: Token = value
+        self.type: Scope.Type = None
         if value.type == "INT":
-            self.type = GlobalScope.intType
+            self.type = IntType.get_instance()
         elif value.type == "BOOLEAN":
-            self.type = GlobalScope.booleanType
+            self.type = BooleanType.get_instance()
         else:
             assert False
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} '{self.value}'>"
 
 
 class Reference(Construct):
-    construct_name = "ref"
+    construct_name: str = "ref"
 
-    def __init__(self, name):
+    def __init__(self, name: Token):
         super().__init__([])
-        self.name = name
-        self.target = None
+        self.name: Token = name
+        self.target: Any = None
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} '{self.name}'>"
 
 
 class TypeReference(Reference):
-    construct_name = "type_ref"
+    construct_name: str = "type_ref"
 
     def __init__(self, name):
-       super().__init__(name)
-       self.type = None
+        super().__init__(name)
+        self.type: Scope.Type = None
 
 
 class FunctionReference(Reference):
-    construct_name = "function_ref"
+    construct_name: str = "function_ref"
 
 
 class VariableReference(Reference, Expression):
-    construct_name = "variable_ref"
+    construct_name: str = "variable_ref"
 
-    def __init__(self, name):
+    def __init__(self, name: Token):
         Reference.__init__(self, name)
         Expression.__init__(self, [])
 
 
 class NamespaceReference(Reference):
-    construct_name = "namespace_ref"
+    construct_name: str = "namespace_ref"

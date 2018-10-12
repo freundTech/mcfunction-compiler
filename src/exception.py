@@ -1,3 +1,9 @@
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from symboltable import Scope
+
+
 class CompilerException(Exception):
     pass
 
@@ -32,7 +38,7 @@ class TypeMissmatchException(CompilerException):
 
 
 class BadOperandException(CompilerException):
-    def __init__(self, operand, *types):
+    def __init__(self, operand: str, *types: "Scope.Type"):
         if len(types) > 1:
             types_string = ", ".join([f"'{type.name}'" for type in types])
             super().__init__(f"Operand '{operand}' cannot be applied to types {types_string}")
