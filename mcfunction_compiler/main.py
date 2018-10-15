@@ -28,7 +28,7 @@ if __name__ == "__main__":
         print(f"'{output_path}' is not a directory", file=sys.stderr)
         exit(1)
 
-    grammar = resource_string(__name__, "grammar.lark").decode()
+    grammar = resource_string("mcfunction_compiler.resources", "grammar.lark").decode()
     l = Lark(grammar, parser="earley")
 
     with input_path.open() as file:
@@ -37,4 +37,7 @@ if __name__ == "__main__":
         t = TreeTransformer()
         ast = t.transform(tree)
         ast.accept(NameResolver())
-        ast.accept(CodeGenerator())
+        generator = CodeGenerator()
+        ast.accept(generator)
+        generator.write_to_files(output_path)
+

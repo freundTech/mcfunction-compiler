@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Type
 
 from lark import Tree
 
+from helper import Singleton
 from symboltable import IntType, BooleanType
 
 if TYPE_CHECKING:
@@ -11,7 +12,7 @@ if TYPE_CHECKING:
     from lark.lexer import Token
     from instructions import Instruction
     from visitor import Visitor
-    from symboltable import Scope
+
 
 class Construct(Tree):
     construct_name: str = None
@@ -37,20 +38,27 @@ class Namespace(Construct):
     def __init__(self, reference: NamespaceReference):
         super().__init__([reference])
         self.reference: NamespaceReference = reference
+        self.name: str = None
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} '{self.reference}'>"
 
 
-class Arguments(Construct):
+class McfcNamespace(Namespace, metaclass=Singleton):
+    def __init__(self):
+        super().__init__(None)
+        self.name = "mcfc"
+
+
+class ArgumentsDeclaration(Construct):
     construct_name: str = "arguments"
 
-    def __init__(self, arguments: List[Argument]):
+    def __init__(self, arguments: List[ArgumentDeclaration]):
         super().__init__(arguments)
         self.arguments = arguments
 
 
-class Argument(Construct):
+class ArgumentDeclaration(Construct):
     construct_name: str = "argument"
 
     def __init__(self, type_: TypeReference, reference: VariableReference):
@@ -82,10 +90,10 @@ class Event(Construct):
 class FunctionDeclaration(Construct):
     construct_name: str = "function_declaration"
 
-    def __init__(self, reference: FunctionReference, arguments: Arguments, event: Event, block: Block):
+    def __init__(self, reference: FunctionReference, arguments: ArgumentsDeclaration, event: Event, block: Block):
         super().__init__([x for x in [reference, arguments, block] if x is not None])
         self.reference: FunctionReference = reference
-        self.arguments: Arguments = arguments
+        self.arguments: ArgumentsDeclaration = arguments
         self.event: Event = event
         self.block: Block = block
 
@@ -100,12 +108,12 @@ class Statement(Construct):
 class VariableDeclaration(Statement):
     construct_name: str = "variable_declaration"
 
-    def __init__(self, type_ref: TypeReference, reference: VariableReference, expression: Optional[Expression]=None):
+    def __init__(self, type_ref: TypeReference, reference: VariableReference, expression: Optional[Expression] = None):
         super().__init__([x for x in [type_ref, reference, expression] if x is not None])
         self.type_ref: TypeReference = type_ref
         self.reference: VariableReference = reference
         self.expression: Expression = expression
-        self.type: Scope.Type = None
+        self.type: Type = None
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} '{self.reference}'>"
@@ -136,7 +144,7 @@ class Expression(Construct):
 
     def __init__(self, children: List[Expression]):
         super().__init__(children)
-        self.type: Scope.Type = None
+        self.type: Type = None
 
 
 class Assignment(Expression):
@@ -243,11 +251,11 @@ class Constant(Expression):
     def __init__(self, value: Token):
         super().__init__([])
         self.value: Token = value
-        self.type: Scope.Type = None
+        self.type: Type = None
         if value.type == "INT":
-            self.type = IntType.get_instance()
+            self.type = IntType()
         elif value.type == "BOOLEAN":
-            self.type = BooleanType.get_instance()
+            self.type = BooleanType()
         else:
             assert False
 
@@ -272,7 +280,7 @@ class TypeReference(Reference):
 
     def __init__(self, name):
         super().__init__(name)
-        self.type: Scope.Type = None
+        self.type: Type = None
 
 
 class FunctionReference(Reference):

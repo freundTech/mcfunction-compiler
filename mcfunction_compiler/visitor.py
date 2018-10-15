@@ -28,6 +28,7 @@ class NameResolver(Visitor):
 
     def namespace(self, namespace: Namespace):
         self.namespace_ = namespace
+        namespace.name = namespace.reference.name
         self.table.push(GlobalScope(self.namespace_))
 
     def function_declaration(self, function_: FunctionDeclaration):
@@ -65,87 +66,87 @@ class NameResolver(Visitor):
 
     def or_operation(self, expression: OrOperation):
         self.__default__(expression)
-        if expression.left_expression.type != BooleanType.get_instance() or expression.right_expression.type != BooleanType.get_instance():
+        if expression.left_expression.type != BooleanType() or expression.right_expression.type != BooleanType():
             raise BadOperandException("||", expression.left_expression.type, expression.right_expression.type)
-        expression.type = BooleanType.get_instance()
+        expression.type = BooleanType()
 
     def and_operation(self, expression: AndOperation):
         self.__default__(expression)
-        if expression.left_expression.type != BooleanType.get_instance() or expression.right_expression.type != BooleanType.get_instance():
+        if expression.left_expression.type != BooleanType() or expression.right_expression.type != BooleanType():
             raise BadOperandException("&&", expression.left_expression.type, expression.right_expression.type)
-        expression.type = BooleanType.get_instance()
+        expression.type = BooleanType()
 
     def equality_operation(self, expression: EqualityOperation):
         self.__default__(expression)
         if expression.left_expression.type != expression.right_expression.type:
             raise BadOperandException("==", expression.left_expression.type, expression.right_expression.type)
-        expression.type = BooleanType.get_instance()
+        expression.type = BooleanType()
 
     def unequality_operation(self, expression: UnequalityOperation):
         self.__default__(expression)
         if expression.left_expression.type != expression.right_expression.type:
             raise BadOperandException("!=", expression.left_expression.type, expression.right_expression.type)
-        expression.type = BooleanType.get_instance()
+        expression.type = BooleanType()
 
     def less_then_operation(self, expression: LessThenOperation):
         self.__default__(expression)
-        if expression.left_expression.type != IntType.get_instance() or expression.right_expression.type != IntType.get_instance():
+        if expression.left_expression.type != IntType() or expression.right_expression.type != IntType():
             raise BadOperandException("<", expression.left_expression.type, expression.right_expression.type)
-        expression.type = BooleanType.get_instance()
+        expression.type = BooleanType()
 
     def less_then_equals_operation(self, expression: LessThenEqualsOperation):
         self.__default__(expression)
-        if expression.left_expression.type != IntType.get_instance() or expression.right_expression.type != IntType.get_instance():
+        if expression.left_expression.type != IntType() or expression.right_expression.type != IntType():
             raise BadOperandException("<=", expression.left_expression.type, expression.right_expression.type)
-        expression.type = BooleanType.get_instance()
+        expression.type = BooleanType()
 
     def greater_then_operation(self, expression: GreaterThenOperation):
         self.__default__(expression)
-        if expression.left_expression.type != IntType.get_instance() or expression.right_expression.type != IntType.get_instance():
+        if expression.left_expression.type != IntType() or expression.right_expression.type != IntType():
             raise BadOperandException(">", expression.left_expression.type, expression.right_expression.type)
-        expression.type = BooleanType.get_instance()
+        expression.type = BooleanType()
 
     def greater_then_equals_operation(self, expression: GreaterThenEqualsOperation):
         self.__default__(expression)
-        if expression.left_expression.type != IntType.get_instance() or expression.right_expression.type != IntType.get_instance():
+        if expression.left_expression.type != IntType() or expression.right_expression.type != IntType():
             raise BadOperandException(">=", expression.left_expression.type, expression.right_expression.type)
-        expression.type = BooleanType.get_instance()
+        expression.type = BooleanType()
 
     def addition_operation(self, expression: AdditionOperation):
         self.__default__(expression)
-        if expression.left_expression.type != IntType.get_instance() or expression.right_expression.type != IntType.get_instance():
+        if expression.left_expression.type != IntType() or expression.right_expression.type != IntType():
             raise BadOperandException("+", expression.left_expression.type, expression.right_expression.type)
-        expression.type = IntType.get_instance()
+        expression.type = IntType()
 
     def subtraction_operation(self, expression: SubtractionOperation):
         self.__default__(expression)
-        if expression.left_expression.type != IntType.get_instance() or expression.right_expression.type != IntType.get_instance():
+        if expression.left_expression.type != IntType() or expression.right_expression.type != IntType():
             raise BadOperandException("-", expression.left_expression.type, expression.right_expression.type)
-        expression.type = IntType.get_instance()
+        expression.type = IntType()
 
     def multiplication_operation(self, expression: MultiplicationOperation):
         self.__default__(expression)
-        if expression.left_expression.type != IntType.get_instance() or expression.right_expression.type != IntType.get_instance():
+        if expression.left_expression.type != IntType() or expression.right_expression.type != IntType():
             raise BadOperandException("*", expression.left_expression.type, expression.right_expression.type)
-        expression.type = IntType.get_instance()
+        expression.type = IntType()
 
     def division_operation(self, expression: DivisionOperation):
         self.__default__(expression)
-        if expression.left_expression.type != IntType.get_instance() or expression.right_expression.type != IntType.get_instance():
+        if expression.left_expression.type != IntType() or expression.right_expression.type != IntType():
             raise BadOperandException("/", expression.left_expression.type, expression.right_expression.type)
-        expression.type = IntType.get_instance()
+        expression.type = IntType()
 
     def unary_plus_operation(self, expression: UnaryPlusOperation):
-        if expression.expression.type != IntType.get_instance():
+        if expression.expression.type != IntType():
             raise BadOperandException("+", expression.expression.type)
-        expression.type = IntType.get_instance()
+        expression.type = IntType()
 
     def unary_minus_operation(self, expression: UnaryMinusOperation):
-        if expression.expression.type != IntType.get_instance():
+        if expression.expression.type != IntType():
             raise BadOperandException("-", expression.expression.type)
-        expression.type = IntType.get_instance()
+        expression.type = IntType()
 
     def unary_not_operation(self, expression: UnaryNotOperation):
-        if expression.expression.type != BooleanType.get_instance():
+        if expression.expression.type != BooleanType():
             raise BadOperandException("!", expression.expression.type)
-        expression.type = BooleanType.get_instance()
+        expression.type = BooleanType()

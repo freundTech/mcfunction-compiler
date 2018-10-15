@@ -17,15 +17,15 @@ class TreeTransformer(Transformer):
         assert isinstance(args[0], NamespaceReference)
         return Namespace(args[0])
 
-    def arguments(self, args: List[Any]):
+    def arguments_declaration(self, args: List[Any]):
         for arg in args:
-            assert isinstance(arg, Argument)
-        return Arguments(args)
+            assert isinstance(arg, ArgumentDeclaration)
+        return ArgumentsDeclaration(args)
 
-    def argument(self, args: List[Any]):
+    def argument_declaration(self, args: List[Any]):
         assert isinstance(args[0], TypeReference)
         assert isinstance(args[1], VariableReference)
-        return Argument(args[0], args[1])
+        return ArgumentDeclaration(args[0], args[1])
 
     def events(self, args: List[Any]):
         for arg in args:
@@ -39,7 +39,7 @@ class TreeTransformer(Transformer):
 
     def function_declaration(self, args: List[Any]):
         assert isinstance(args[0], FunctionReference)
-        assert isinstance(args[1], Arguments)
+        assert isinstance(args[1], ArgumentsDeclaration)
         assert isinstance(args[2], Events)
         assert isinstance(args[3], Block)
         return FunctionDeclaration(args[0], args[1], args[2], args[3])

@@ -14,15 +14,17 @@ start: namespace (class_declaration | function_declaration | variable_declaratio
 
 namespace: "namespace " namespace_ref ";"
 
-arguments: (argument ("," argument)*)?
+arguments_declaration: (argument_declaration ("," argument_declaration)*)?
 
-argument: type_ref variable_ref
+argument_declaration: type_ref variable_ref
+
+arguments: (expression ("," expression)*)?
 
 events: ("on " event ("," event)*)?
 
 event: namespace_ref ":" function_ref
 
-function_declaration: "function " function_ref "(" arguments ")" events block
+function_declaration: "function " function_ref "(" arguments_declaration ")" events block
 
 variable_declaration: type_ref variable_ref ("=" expression)? ";"
 

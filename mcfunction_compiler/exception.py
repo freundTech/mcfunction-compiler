@@ -38,7 +38,7 @@ class TypeMissmatchException(CompilerException):
 
 
 class BadOperandException(CompilerException):
-    def __init__(self, operand: str, *types: "Scope.Type"):
+    def __init__(self, operand: str, *types: "Type"):
         if len(types) > 1:
             types_string = ", ".join([f"'{type.name}'" for type in types])
             super().__init__(f"Operand '{operand}' cannot be applied to types {types_string}")
