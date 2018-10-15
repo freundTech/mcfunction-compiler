@@ -16,7 +16,7 @@ from instructions import StoreInstruction, RunInstruction, \
     AdditionInstruction, EqualityInstruction, Instruction, InvertInstruction, \
     CallIfZeroInstruction, CallIfNotZeroInstruction, LessThenInstruction, UnequalityInstruction, \
     LessThenEqualsInstruction, GreaterThenEqualsInstruction, GreaterThenInstruction, SubtractionInstruction, \
-    MultiplicationInstruction, DivisionInstruction
+    MultiplicationInstruction, DivisionInstruction, ModuloInstruction
 from symboltable import BuiltinType, BlockScope, Variable, Type
 from visitor import Visitor
 
@@ -58,7 +58,8 @@ class CodeGenerator(Visitor):
             }}
             json.dump(metadata, pack_mcmeta)
         functions_dir = output_directory.joinpath("data").joinpath(self.namespace_.name).joinpath("functions")
-        functions_dir.mkdir(parents=True)
+        if not functions_dir.exists():
+            functions_dir.mkdir(parents=True)
         for function_name in self.functions:
             with functions_dir.joinpath(f"{function_name}.mcfunction").open("w+") as function_file:
                 for instruction in self.functions[function_name]:

@@ -7,6 +7,7 @@ from helper import Singleton
 
 if TYPE_CHECKING:
     from constructs import Namespace, VariableReference, TypeReference, FunctionReference
+    from codegeneration import NameManager
 
 
 class Variable:
@@ -16,7 +17,7 @@ class Variable:
         self.type: Type = type_
         self.compiled_name: str = None
 
-    def get_identifier(self) -> str:
+    def get_identifier(self, name_manager: NameManager) -> str:
         raise NotImplementedError
 
     def get_type(self) -> Type:
@@ -28,7 +29,7 @@ class Function:
         self.namespace: Namespace = namespace
         self.name: str = name
 
-    def get_identifier(self) -> str:
+    def get_identifier(self, name_manager: NameManager) -> str:
         raise NotImplementedError
 
 
@@ -89,11 +90,11 @@ class GlobalScope(Scope):
         raise NotImplementedError
 
     class GlobalVariable(Variable):
-        def get_identifier(self) -> str:
+        def get_identifier(self, name_manager: NameManager) -> str:
             return f"global {self.namespace.reference.name}.{self.name}"
 
     class GlobalFunction(Function):
-        def get_identifier(self) -> str:
+        def get_identifier(self, name_manager: NameManager) -> str:
             return f"{self.namespace.reference.name}:{self.name}"
 
     class GlobalType(Type):
@@ -115,7 +116,7 @@ class BlockScope(Scope):
         raise NotImplementedError
 
     class LocalVariable(Variable):
-        def get_identifier(self) -> str:
+        def get_identifier(self, name_manager: NameManager) -> str:
             return f"@e[type=armor_stand,tag=stack_frame,scores={{mcfc.stack_depth=1}},limit=1] {self.namespace.name}.{self.name}"
 
 
