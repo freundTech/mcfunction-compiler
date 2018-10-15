@@ -133,6 +133,15 @@ class DivisionInstruction(Instruction):
         return f"scoreboard players operation {self.target.get_identifier()} /= {self.source.get_identifier()}"
 
 
+class ModuloInstruction(Instruction):
+    def __init__(self, target: Variable, source: Variable):
+        self.target: Variable = target
+        self.source: Variable = source
+
+    def to_string(self) -> str:
+        return f"scoreboard players operation {self.target.get_identifier()} %= {self.source.get_identifier()}"
+
+
 class Negateinstruction(Instruction):
     def __init__(self, variable: Variable):
         self.variable = variable

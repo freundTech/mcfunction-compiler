@@ -6,11 +6,12 @@ from typing import List, Dict, Optional
 
 from lark.lexer import Token
 
-from constructs import FunctionDeclaration, Block, ArgumentsDeclaration, Constant, VariableDeclaration, Namespace, Start, \
+from constructs import FunctionDeclaration, Block, ArgumentsDeclaration, Constant, VariableDeclaration, Namespace, \
+    Start, \
     Construct, ExpressionStatement, RunExpression, Assignment, AdditionOperation, VariableReference, OrOperation, \
     EqualityOperation, UnaryNotOperation, McfcNamespace, AndOperation, UnequalityOperation, LessThenOperation, \
     LessThenEqualsOperation, GreaterThenOperation, GreaterThenEqualsOperation, SubtractionOperation, \
-    MultiplicationOperation, DivisionOperation, UnaryPlusOperation, UnaryMinusOperation
+    MultiplicationOperation, DivisionOperation, UnaryPlusOperation, UnaryMinusOperation, ModuloOperation
 from instructions import StoreInstruction, RunInstruction, \
     AdditionInstruction, EqualityInstruction, Instruction, InvertInstruction, \
     CallIfZeroInstruction, CallIfNotZeroInstruction, LessThenInstruction, UnequalityInstruction, \
@@ -228,6 +229,14 @@ class CodeGenerator(Visitor):
         operation.right_expression.accept(self)
         operation.code = operation.left_expression.code + operation.right_expression.code + [
             DivisionInstruction(self.name_manager.get_register(1), self.name_manager.get_register())
+        ]
+        self.name_manager.free_register()
+
+    def modulo_operation(self, operation: ModuloOperation):
+        operation.left_expression.accept(self)
+        operation.right_expression.accept(self)
+        operation.code = operation.left_expression.code + operation.right_expression.code + [
+            ModuloInstruction(self.name_manager.get_register(1), self.name_manager.get_register())
         ]
         self.name_manager.free_register()
 

@@ -177,6 +177,15 @@ class ParseTest(unittest.TestCase):
                                  Token("INT", "1")
                              ])
                          ]))
+        self.assertEqual(l.parse("test % 1"),
+                         Tree("modulo_operation", [
+                             Tree("variable_ref", [
+                                 Token("IDENTIFIER", "test")
+                             ]),
+                             Tree("constant", [
+                                 Token("INT", "1")
+                             ])
+                         ]))
         self.assertEqual(l.parse("+1"),
                          Tree("unary_plus_operation", [
                              Tree("constant", [

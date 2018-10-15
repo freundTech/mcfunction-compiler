@@ -4,7 +4,7 @@ from constructs import FunctionReference, Namespace, Construct, FunctionDeclarat
     TypeReference, VariableReference, Assignment, Expression, OrOperation, AndOperation, EqualityOperation, \
     UnequalityOperation, LessThenOperation, LessThenEqualsOperation, GreaterThenOperation, GreaterThenEqualsOperation, \
     AdditionOperation, SubtractionOperation, MultiplicationOperation, DivisionOperation, UnaryPlusOperation, \
-    UnaryMinusOperation, UnaryNotOperation
+    UnaryMinusOperation, UnaryNotOperation, ModuloOperation
 from exception import BadOperandException
 from symboltable import SymbolTable, BlockScope, GlobalScope, BooleanType, IntType
 
@@ -134,6 +134,12 @@ class NameResolver(Visitor):
         self.__default__(expression)
         if expression.left_expression.type != IntType() or expression.right_expression.type != IntType():
             raise BadOperandException("/", expression.left_expression.type, expression.right_expression.type)
+        expression.type = IntType()
+
+    def modulo_operation(self, expression: ModuloOperation):
+        self.__default__(expression)
+        if expression.left_expression.type != IntType() or expression.right_expression.type != IntType():
+            raise BadOperandException("%", expression.left_expression.type, expression.right_expression.type)
         expression.type = IntType()
 
     def unary_plus_operation(self, expression: UnaryPlusOperation):

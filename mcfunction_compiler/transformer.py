@@ -138,6 +138,11 @@ class TreeTransformer(Transformer):
         assert isinstance(args[1], Expression)
         return DivisionOperation(args[0], args[1])
 
+    def modulo_operation(self, args: List[Any]):
+        assert isinstance(args[0], Expression)
+        assert isinstance(args[1], Expression)
+        return ModuloOperation(args[0], args[1])
+
     def unary_plus_operation(self, args: List[Any]):
         assert isinstance(args[0], Expression)
         return UnaryPlusOperation(args[0])

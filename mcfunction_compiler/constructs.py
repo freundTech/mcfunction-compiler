@@ -221,6 +221,10 @@ class DivisionOperation(TwoSidedOperation):
     construct_name: str = "division_operation"
 
 
+class ModuloOperation(TwoSidedOperation):
+    construct_name: str = "modulo_operation"
+
+
 class UnaryPlusOperation(UnaryOperation):
     construct_name: str = "unary_plus_operation"
 

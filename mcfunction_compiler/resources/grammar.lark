@@ -62,6 +62,7 @@ block: "{" statement* "}"
 
 ?multiplication_operation: base_term | multiplication_operation "*" base_term
     | multiplication_operation "/" base_term -> division_operation
+    | multiplication_operation "%" base_term -> modulo_operation
 
 ?base_term: atom
     | "+" base_term -> unary_plus_operation
